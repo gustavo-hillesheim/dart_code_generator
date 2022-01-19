@@ -10,7 +10,7 @@ abstract class Generator<T extends CompilationUnitMember> {
   /// This method will be called with every top-level [member] defined in every library from the source code directory informed in [CodeGenerator.generateFor].
   bool shouldGenerateFor(CompilationUnitMember member) => member is T;
 
-  /// Generates files for a given [Declaration].
+  /// Generates files for a given [CompilationUnitMember].
   ///
   /// [member] is any [CompilationUnitMember] that passes [shouldGenerateFor], and [path] is the absolute path to the library where this member is declared.
   GeneratorResult generate(T member, String path);
