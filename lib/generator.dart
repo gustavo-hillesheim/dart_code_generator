@@ -7,8 +7,9 @@ import 'generator_result.dart';
 abstract class Generator<T extends CompilationUnitMember> {
   /// Verifies if should generate files for a given [CompilationUnitMember].
   ///
-  /// This method will be called with every top-level [member] defined in every library from the source code directory informed in [CodeGenerator.generateFor].
-  bool shouldGenerateFor(CompilationUnitMember member) => member is T;
+  /// [member] is a top-level declaration in a library, and [path] is the library's absolute path.
+  bool shouldGenerateFor(CompilationUnitMember member, String path) =>
+      member is T;
 
   /// Generates files for a given [CompilationUnitMember].
   ///
@@ -53,7 +54,7 @@ abstract class GeneratorForAnnotatedElements<T extends CompilationUnitMember>
   AnnotationMatcher get annotationMatcher;
 
   @override
-  bool shouldGenerateFor(CompilationUnitMember member) {
+  bool shouldGenerateFor(CompilationUnitMember member, String path) {
     return member is T && member.metadata.any(annotationMatcher);
   }
 }

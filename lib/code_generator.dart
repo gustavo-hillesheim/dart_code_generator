@@ -28,7 +28,7 @@ class CodeGenerator {
 
   /// Generates code for the source code inside [packageDirectory].
   ///
-  /// Loops through every top-level member of every library inside [packageDirectory], passing each member to each [Generator] of [_generators].
+  /// Loops through every top-level member of every library inside [packageDirectory], passing each member and it's path to each [Generator] of [_generators].
   Future<void> generateFor(Directory packageDirectory) async {
     final libraries = await _analyzer.analyze(packageDirectory);
     final generatorResult = _runGenerator(libraries);
@@ -49,7 +49,7 @@ class CodeGenerator {
 
   List<GeneratedFile> _generateFor(CompilationUnitMember member, String path) {
     return _generators
-        .where((g) => g.shouldGenerateFor(member))
+        .where((g) => g.shouldGenerateFor(member, path))
         .map((g) => g.generate(member, path).files)
         .fold([], (file, list) => list..addAll(file));
   }
