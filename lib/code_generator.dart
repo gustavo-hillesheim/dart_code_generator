@@ -8,8 +8,16 @@ import 'generator.dart';
 import 'generator_result.dart';
 import 'package_analyzer.dart';
 
+export 'generated_file.dart';
+export 'generator.dart';
+export 'generator_result.dart';
+export 'package_analyzer.dart';
+
 class CodeGenerator {
+  /// Generators used to generate code in [generateFor].
   final List<Generator> _generators;
+
+  /// Used to analyze the package given in [generateFor].
   final PackageAnalyzer _analyzer;
 
   const CodeGenerator({
@@ -18,6 +26,9 @@ class CodeGenerator {
   })  : _generators = generators,
         _analyzer = analyzer;
 
+  /// Generates code for the source code inside [packageDirectory].
+  ///
+  /// Loops through every top-level member of every library inside [packageDirectory], passing each member to each [Generator] of [_generators].
   Future<void> generateFor(Directory packageDirectory) async {
     final libraries = await _analyzer.analyze(packageDirectory);
     final generatorResult = _runGenerator(libraries);

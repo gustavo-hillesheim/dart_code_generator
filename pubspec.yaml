@@ -1,19 +1,14 @@
 name: code_generator
-description: A simple command-line application.
+description: A package to help generate Dart code from existing code
 version: 1.0.0
-# homepage: https://www.example.com
 
 environment:
-  sdk: '>=2.14.1 <3.0.0'
-
-
-# dependencies:
-#   path: ^1.8.0
+  sdk: ">=2.14.1 <3.0.0"
 
 dev_dependencies:
   code_coverage: ^1.4.0
   lints: ^1.0.0
   mocktail: ^0.2.0
   test: ^1.20.1
-dependencies: 
+dependencies:
   analyzer: ^3.1.0

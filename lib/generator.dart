@@ -1,13 +1,18 @@
 import 'package:analyzer/dart/ast/ast.dart';
+import 'package:code_generator/code_generator.dart';
 
 import 'generator_result.dart';
 
 /// Generates files for a given [CompilationUnitMember].
 abstract class Generator<T extends CompilationUnitMember> {
   /// Verifies if should generate files for a given [CompilationUnitMember].
+  ///
+  /// This method will be called with every top-level [member] defined in every library from the source code directory informed in [CodeGenerator.generateFor].
   bool shouldGenerateFor(CompilationUnitMember member) => member is T;
 
   /// Generates files for a given [Declaration].
+  ///
+  /// [member] is any [CompilationUnitMember] that passes [shouldGenerateFor], and [path] is the absolute path to the library where this member is declared.
   GeneratorResult generate(T member, String path);
 }
 
@@ -44,6 +49,7 @@ AnnotationMatcher nameAnnotationMatcher(RegExp nameMatcher) {
 /// Generates files for [CompilationUnitMember]s found in the package that are annotated with a matching annotation.
 abstract class GeneratorForAnnotatedElements<T extends CompilationUnitMember>
     extends Generator<T> {
+  /// Annotation matcher that will be used in [shouldGenerateFor] to determine for which [CompilationUnitMember]s this generator should run.
   AnnotationMatcher get annotationMatcher;
 
   @override
