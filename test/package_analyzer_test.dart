@@ -6,7 +6,7 @@ import 'package:test/test.dart';
 
 void main() {
   final testPackageDirectory = Directory.fromUri(
-    Directory.current.uri.resolve('test/test_package'),
+    Directory.current.uri.resolve('test/analyzer_test_package'),
   );
   late PackageAnalyzer analyzer;
 

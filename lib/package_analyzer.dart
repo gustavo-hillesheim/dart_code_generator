@@ -6,6 +6,8 @@ import 'package:analyzer/file_system/physical_file_system.dart';
 
 /// Analyzes a given package and returns all libraries resolved.
 class PackageAnalyzer {
+  const PackageAnalyzer();
+
   Future<List<ResolvedLibraryResult>> analyze(Directory directory) {
     final collection = _createAnalysisContextCollection(directory);
     return _readLibraries(collection);

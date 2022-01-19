@@ -2,11 +2,52 @@ import 'package:analyzer/dart/ast/ast.dart';
 
 import 'generator_result.dart';
 
-/// Generates files for a given [Declaration].
-abstract class Generator<T extends Declaration> {
-  /// Verifies if should generate files for a given [Declaration].
-  bool shouldGenerateFor(Declaration declaration) => declaration is T;
+/// Generates files for a given [CompilationUnitMember].
+abstract class Generator<T extends CompilationUnitMember> {
+  /// Verifies if should generate files for a given [CompilationUnitMember].
+  bool shouldGenerateFor(CompilationUnitMember member) => member is T;
 
   /// Generates files for a given [Declaration].
-  GeneratorResult generate(T declaration);
+  GeneratorResult generate(T member, String path);
+}
+
+/// Generates files for [ClassDeclaration]s found in the package.
+abstract class GeneratorForClass extends Generator<ClassDeclaration> {}
+
+/// Generates files for [MixinDeclaration]s found in the package.
+abstract class GeneratorForMixin extends Generator<MixinDeclaration> {}
+
+/// Generates files for [FunctionDeclaration]s found in the package.
+abstract class GeneratorForFunction extends Generator<FunctionDeclaration> {}
+
+/// Generates files for [ExtensionDeclaration]s found in the package.
+abstract class GeneratorForExtension extends Generator<ExtensionDeclaration> {}
+
+/// Generates files for [EnumDeclaration]s found in the package.
+abstract class GeneratorForEnum extends Generator<EnumDeclaration> {}
+
+/// Generates files for [TypeAlias]s found in the package.
+abstract class GeneratorForType extends Generator<TypeAlias> {}
+
+/// Generates files for [TopLevelVariableDeclaration]s found in the package.
+abstract class GeneratorForTopLevelVariable
+    extends Generator<TopLevelVariableDeclaration> {}
+
+/// Returns if a given [Annotation] matches a given criteria or criterias.
+typedef AnnotationMatcher = bool Function(Annotation annotation);
+
+/// Returns an [AnnotationMatcher] that matches the annotation name with a RegExp.
+AnnotationMatcher nameAnnotationMatcher(RegExp nameMatcher) {
+  return (annotation) => nameMatcher.hasMatch(annotation.name.name);
+}
+
+/// Generates files for [CompilationUnitMember]s found in the package that are annotated with a matching annotation.
+abstract class GeneratorForAnnotatedElements<T extends CompilationUnitMember>
+    extends Generator<T> {
+  AnnotationMatcher get annotationMatcher;
+
+  @override
+  bool shouldGenerateFor(CompilationUnitMember member) {
+    return member is T && member.metadata.any(annotationMatcher);
+  }
 }
