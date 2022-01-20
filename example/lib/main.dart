@@ -14,9 +14,8 @@ void main() {
 
 class RepositoryGenerator extends GeneratorForClass {
   @override
-  bool shouldGenerateFor(CompilationUnitMember member, String path) {
-    return super.shouldGenerateFor(member, path) &&
-        (member as ClassDeclaration).name.name == 'User';
+  bool shouldGenerateFor(ClassDeclaration member, String path) {
+    return super.shouldGenerateFor(member, path) && member.name.name == 'User';
   }
 
   @override

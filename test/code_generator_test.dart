@@ -42,9 +42,10 @@ void main() {
   });
 
   void mockGenerator<T extends CompilationUnitMember>(Generator<T> generator) {
-    when(() => generator.shouldGenerateFor(any(), any())).thenAnswer(
+    when(() => generator.isOfAcceptedType(any())).thenAnswer(
       (invocation) => invocation.positionalArguments[0] is T,
     );
+    when(() => generator.shouldGenerateFor(any(), any())).thenReturn(true);
     when(() => generator.generate(any<T>(), any()))
         .thenReturn(GeneratorResult([]));
   }
@@ -91,10 +92,13 @@ void main() {
 
   test('WHEN generator returns file to save SHOULD save file', () async {
     final filePath = getTempFilePath('generated.dart');
+    when(() => generatorForClass.isOfAcceptedType(any())).thenAnswer(
+      (invocation) => invocation.positionalArguments[0] is ClassDeclaration,
+    );
     when(() => generatorForClass.shouldGenerateFor(any(), any()))
         .thenAnswer((invocation) {
-      CompilationUnitMember declaration = invocation.positionalArguments[0];
-      return declaration.declaredElement?.name == 'Class';
+      ClassDeclaration declaration = invocation.positionalArguments[0];
+      return declaration.name.name == 'Class';
     });
     when(() => generatorForClass.generate(any(), any())).thenReturn(
       GeneratorResult.single(path: filePath, content: 'final a = 1'),

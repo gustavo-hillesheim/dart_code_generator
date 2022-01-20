@@ -49,7 +49,8 @@ class CodeGenerator {
 
   List<GeneratedFile> _generateFor(CompilationUnitMember member, String path) {
     return _generators
-        .where((g) => g.shouldGenerateFor(member, path))
+        .where((g) =>
+            g.isOfAcceptedType(member) && g.shouldGenerateFor(member, path))
         .map((g) => g.generate(member, path).files)
         .fold([], (file, list) => list..addAll(file));
   }

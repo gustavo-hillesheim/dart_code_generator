@@ -5,11 +5,15 @@ import 'generator_result.dart';
 
 /// Generates files for a given [CompilationUnitMember].
 abstract class Generator<T extends CompilationUnitMember> {
+  /// Verifies if a given [CompilationUnitMember] is acceptable for this generator.
+  ///
+  /// [member] is a top-level declaration in a library.
+  bool isOfAcceptedType(CompilationUnitMember member) => member is T;
+
   /// Verifies if should generate files for a given [CompilationUnitMember].
   ///
-  /// [member] is a top-level declaration in a library, and [path] is the library's absolute path.
-  bool shouldGenerateFor(CompilationUnitMember member, String path) =>
-      member is T;
+  /// [member] is a top-level declaration in a library that is [T], and [path] is the library's absolute path.
+  bool shouldGenerateFor(T member, String path) => true;
 
   /// Generates files for a given [CompilationUnitMember].
   ///
