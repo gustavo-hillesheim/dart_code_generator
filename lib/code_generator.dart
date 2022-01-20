@@ -13,6 +13,7 @@ export 'generator.dart';
 export 'generator_result.dart';
 export 'package_analyzer.dart';
 
+/// Analyzes a package and runs any registered generator that should generate for a given declaration.
 class CodeGenerator {
   /// Generators used to generate code in [generateFor].
   final List<Generator> _generators;
@@ -31,11 +32,14 @@ class CodeGenerator {
   /// Loops through every top-level member of every library inside [packageDirectory], passing each member and it's path to each [Generator] of [_generators].
   Future<void> generateFor(Directory packageDirectory) async {
     final libraries = await _analyzer.analyze(packageDirectory);
-    final generatorResult = _runGenerator(libraries);
+    final generatorResult = runGenerators(libraries);
     await _saveFiles(generatorResult.files);
   }
 
-  GeneratorResult _runGenerator(List<ResolvedLibraryResult> libraries) {
+  /// Executes the generators for the given libraries.
+  ///
+  /// Loops through every top-level declaration in every item of [libraries], passing them to each generators registered, and returning all files that would be generated.
+  GeneratorResult runGenerators(List<ResolvedLibraryResult> libraries) {
     final files = <GeneratedFile>[];
     for (final library in libraries) {
       for (final unit in library.units) {
