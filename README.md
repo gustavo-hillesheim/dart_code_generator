@@ -42,9 +42,10 @@ class RepositoryGenerator extends Generator<ClassDeclaration> {
   @override
   GeneratorResult generate(ClassDeclaration member, String path) {
     final memberName = member.name.name;
+    final repositoryName = '${memberName}Repository';
     return GeneratorResult.single(
-      path: path.relative('../repository/${memberName}Repository', from: path),
-      content: 'class ${memberName}Repository {}',
+      path: join(path, '../../repository/repository.dart'),
+      content: 'class $repositoryName {}',
     );
   }
 }
