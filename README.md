@@ -35,8 +35,8 @@ import 'package:code_generator/code_generator.dart';
 import 'package:path/path.dart' as path;
 
 class RepositoryGenerator extends Generator<ClassDeclaration> {
-  bool shouldGenerateFor(CompilationUnitMember member, String path) {
-    return member is ClassDeclaration && member.name.name.endsWith('Entity');
+  bool shouldGenerateFor(ClassDeclaration member, String path) {
+    return member.name.name.endsWith('Entity');
   }
 
   @override
