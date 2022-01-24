@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:analyzer/dart/analysis/results.dart';
+import 'package:path/path.dart' show normalize;
 
 import 'generation_step.dart';
 import 'generated_file.dart';
@@ -74,15 +75,16 @@ class CodeGenerator {
   Stream<GenerationStep> _saveFiles(List<GeneratedFile> generatedFiles) async* {
     for (final generatedFile in generatedFiles) {
       final file = File(generatedFile.path);
+      final filePath = normalize(generatedFile.path);
       try {
         if (!await file.exists()) {
           await file.create(recursive: true);
           await file.writeAsString(generatedFile.content);
         } else {
-          yield IgnoredExistingFile(file.path);
+          yield IgnoredExistingFile(filePath);
         }
       } catch (e) {
-        yield SavingError(e, file.path);
+        yield SavingError(e, filePath);
       }
     }
   }

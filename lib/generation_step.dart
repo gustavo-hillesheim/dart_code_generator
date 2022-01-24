@@ -68,7 +68,7 @@ class IgnoredExistingFile extends GenerationStep {
 
   @override
   String get message =>
-      'Did not save generated "$filePath" because it already exists';
+      'Did not save generated file "$filePath" because it already exists';
 
   @override
   List<Object?> get props => [filePath, message];
