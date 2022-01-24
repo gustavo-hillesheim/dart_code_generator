@@ -81,11 +81,13 @@ void main() {
     final events =
         await codeGenerator.generateFor(testPackageDirectory).toList();
 
+    expect(events.length, 13);
     expect(events[0], isA<AnalyzingPackageStep>());
     expect(events[1], isA<RunningGeneratorsStep>());
-    for (var i = 2; i < events.length; i++) {
+    for (var i = 2; i < events.length - 1; i++) {
       expect(events[i], isA<RunningGeneratorStep>());
     }
+    expect(events.last, isA<CodeGenerationResult>());
     verify(() => generatorForClass.generate(any(), any()));
     verify(() => generatorForMixin.generate(any(), any()));
     verify(() => generatorForFunction.generate(any(), any()));

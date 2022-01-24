@@ -31,12 +31,13 @@ class CodeGenerator {
   /// Loops through every top-level member of every library inside [packageDirectory],
   /// passing each member and it's path to each [Generator] of [_generators].
   /// Returns a stream containing a [AnalyzingPackageStep], a [RunningGeneratorsStep]
-  /// and [RunningGeneratorStep] for all generators ran.
+  /// [RunningGeneratorStep]s for all generators ran and a final [CodeGenerationResult] for the result.
   Stream<GenerationStep> generateFor(Directory packageDirectory) async* {
     yield AnalyzingPackageStep();
     final libraries = await _analyzer.analyze(packageDirectory);
     yield RunningGeneratorsStep();
     await for (final step in runGenerators(libraries)) {
+      yield step;
       if (step is CodeGenerationResult) {
         await _saveFiles(step.files);
       }
