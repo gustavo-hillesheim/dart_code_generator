@@ -1,12 +1,11 @@
 import 'dart:io';
 
 import 'package:analyzer/dart/ast/ast.dart';
+import 'package:code_generator/generation_step.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 import 'package:path/path.dart';
 import 'package:code_generator/code_generator.dart';
-import 'package:code_generator/generator.dart';
-import 'package:code_generator/generator_result.dart';
 
 void main() {
   final testPackageDirectory = Directory.fromUri(
@@ -42,9 +41,10 @@ void main() {
   });
 
   void mockGenerator<T extends CompilationUnitMember>(Generator<T> generator) {
-    when(() => generator.isOfAcceptedType(any())).thenAnswer(
+    when(() => generator.acceptsType(any())).thenAnswer(
       (invocation) => invocation.positionalArguments[0] is T,
     );
+    when(() => generator.description).thenReturn('test generator');
     when(() => generator.shouldGenerateFor(any(), any())).thenReturn(true);
     when(() => generator.generate(any<T>(), any()))
         .thenReturn(GeneratorResult([]));
@@ -78,8 +78,14 @@ void main() {
       generatorForAnnotatedElements,
     ]);
 
-    await codeGenerator.generateFor(testPackageDirectory);
+    final events =
+        await codeGenerator.generateFor(testPackageDirectory).toList();
 
+    expect(events[0], isA<AnalyzingPackageStep>());
+    expect(events[1], isA<RunningGeneratorsStep>());
+    for (var i = 2; i < events.length; i++) {
+      expect(events[i], isA<RunningGeneratorStep>());
+    }
     verify(() => generatorForClass.generate(any(), any()));
     verify(() => generatorForMixin.generate(any(), any()));
     verify(() => generatorForFunction.generate(any(), any()));
@@ -92,7 +98,7 @@ void main() {
 
   test('WHEN generator returns file to save SHOULD save file', () async {
     final filePath = getTempFilePath('generated.dart');
-    when(() => generatorForClass.isOfAcceptedType(any())).thenAnswer(
+    when(() => generatorForClass.acceptsType(any())).thenAnswer(
       (invocation) => invocation.positionalArguments[0] is ClassDeclaration,
     );
     when(() => generatorForClass.shouldGenerateFor(any(), any()))
@@ -100,12 +106,13 @@ void main() {
       ClassDeclaration declaration = invocation.positionalArguments[0];
       return declaration.name.name == 'Class';
     });
+    when(() => generatorForClass.description).thenReturn('test generator');
     when(() => generatorForClass.generate(any(), any())).thenReturn(
       GeneratorResult.single(path: filePath, content: 'final a = 1'),
     );
     final codeGenerator = CodeGenerator(generators: [generatorForClass]);
 
-    await codeGenerator.generateFor(testPackageDirectory);
+    await codeGenerator.generateFor(testPackageDirectory).last;
 
     File generatedFile = File(filePath);
     expect(await generatedFile.exists(), true);

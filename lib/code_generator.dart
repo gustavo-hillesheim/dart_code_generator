@@ -1,11 +1,10 @@
 import 'dart:io';
 
 import 'package:analyzer/dart/analysis/results.dart';
-import 'package:analyzer/dart/ast/ast.dart';
 
+import 'generation_step.dart';
 import 'generated_file.dart';
 import 'generator.dart';
-import 'generator_result.dart';
 import 'package_analyzer.dart';
 
 export 'generated_file.dart';
@@ -29,34 +28,46 @@ class CodeGenerator {
 
   /// Generates code for the source code inside [packageDirectory].
   ///
-  /// Loops through every top-level member of every library inside [packageDirectory], passing each member and it's path to each [Generator] of [_generators].
-  Future<void> generateFor(Directory packageDirectory) async {
+  /// Loops through every top-level member of every library inside [packageDirectory],
+  /// passing each member and it's path to each [Generator] of [_generators].
+  /// Returns a stream containing a [AnalyzingPackageStep], a [RunningGeneratorsStep]
+  /// and [RunningGeneratorStep] for all generators ran.
+  Stream<GenerationStep> generateFor(Directory packageDirectory) async* {
+    yield AnalyzingPackageStep();
     final libraries = await _analyzer.analyze(packageDirectory);
-    final generatorResult = runGenerators(libraries);
-    await _saveFiles(generatorResult.files);
+    yield RunningGeneratorsStep();
+    await for (final step in runGenerators(libraries)) {
+      if (step is CodeGenerationResult) {
+        await _saveFiles(step.files);
+      }
+    }
   }
 
   /// Executes the generators for the given libraries.
   ///
-  /// Loops through every top-level declaration in every item of [libraries], passing them to each generators registered, and returning all files that would be generated.
-  GeneratorResult runGenerators(List<ResolvedLibraryResult> libraries) {
+  /// Loops through every top-level declaration in every item of [libraries],
+  /// passing them to each generators registered, and returning all files that would be generated.
+  /// Returns a stream containing [RunningGeneratorStep] for all generators ran and a [CodeGenerationResult] for the final result.
+  Stream<GenerationStep> runGenerators(
+    List<ResolvedLibraryResult> libraries,
+  ) async* {
     final files = <GeneratedFile>[];
     for (final library in libraries) {
       for (final unit in library.units) {
         for (final declaration in unit.unit.declarations) {
-          files.addAll(_generateFor(declaration, unit.path));
+          for (final generator in _generators) {
+            if (generator.acceptsType(declaration) &&
+                generator.shouldGenerateFor(declaration, unit.path)) {
+              yield RunningGeneratorStep(generator.description);
+              final generatedFiles =
+                  generator.generate(declaration, unit.path).files;
+              files.addAll(generatedFiles);
+            }
+          }
         }
       }
     }
-    return GeneratorResult(files);
-  }
-
-  List<GeneratedFile> _generateFor(CompilationUnitMember member, String path) {
-    return _generators
-        .where((g) =>
-            g.isOfAcceptedType(member) && g.shouldGenerateFor(member, path))
-        .map((g) => g.generate(member, path).files)
-        .fold([], (file, list) => list..addAll(file));
+    yield CodeGenerationResult(files);
   }
 
   Future<void> _saveFiles(List<GeneratedFile> generatedFiles) async {
