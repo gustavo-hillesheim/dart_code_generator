@@ -86,7 +86,7 @@ class CodeGenerator {
       final file = File(generatedFile.path);
       final filePath = normalize(generatedFile.path);
       try {
-        if (!overrideExisting || !await file.exists()) {
+        if (overrideExisting || !await file.exists()) {
           await file.create(recursive: true);
           await file.writeAsString(generatedFile.content);
         } else {
