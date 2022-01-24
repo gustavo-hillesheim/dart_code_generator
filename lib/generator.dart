@@ -16,7 +16,7 @@ abstract class Generator<T extends CompilationUnitMember> {
   bool shouldGenerateFor(T member, String path) => true;
 
   /// Description of the current generator.
-  String get description => '${runtimeType.toString()} generator';
+  String get description => runtimeType.toString();
 
   /// Generates files for a given [CompilationUnitMember].
   ///

@@ -40,7 +40,8 @@ class CodeGenerationResult extends GenerationStep {
   CodeGenerationResult(this.files);
 
   @override
-  String get message => 'Finished code generation';
+  String get message =>
+      'Finished code generation with ${files.length} generated files';
 
   @override
   List<Object?> get props => [files, message];
