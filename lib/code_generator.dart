@@ -31,16 +31,22 @@ class CodeGenerator {
   ///
   /// Loops through every top-level member of every library inside [packageDirectory],
   /// passing each member and it's path to each [Generator] of [_generators].
-  /// Returns a stream containing a [AnalyzingPackageStep], a [RunningGeneratorsStep]
+  /// Use [overrideExisting] to override existing files with the generated content.
+  ///
+  /// Returns a [Stream] containing a [AnalyzingPackageStep], a [RunningGeneratorsStep]
   /// [RunningGeneratorStep]s for all generators ran and a final [CodeGenerationResult] for the result.
-  Stream<GenerationStep> generateFor(Directory packageDirectory) async* {
+  /// The [Stream] can also contain [SavingError]s or [IgnoredExistingFile] events.
+  Stream<GenerationStep> generateFor(
+    Directory packageDirectory, {
+    bool overrideExisting = false,
+  }) async* {
     yield AnalyzingPackageStep();
     final libraries = await _analyzer.analyze(packageDirectory);
     yield RunningGeneratorsStep();
     await for (final step in runGenerators(libraries)) {
       yield step;
       if (step is CodeGenerationResult) {
-        yield* _saveFiles(step.files);
+        yield* _saveFiles(step.files, overrideExisting: overrideExisting);
       }
     }
   }
@@ -72,12 +78,15 @@ class CodeGenerator {
     yield CodeGenerationResult(files);
   }
 
-  Stream<GenerationStep> _saveFiles(List<GeneratedFile> generatedFiles) async* {
+  Stream<GenerationStep> _saveFiles(
+    List<GeneratedFile> generatedFiles, {
+    required bool overrideExisting,
+  }) async* {
     for (final generatedFile in generatedFiles) {
       final file = File(generatedFile.path);
       final filePath = normalize(generatedFile.path);
       try {
-        if (!await file.exists()) {
+        if (!overrideExisting && !await file.exists()) {
           await file.create(recursive: true);
           await file.writeAsString(generatedFile.content);
         } else {
