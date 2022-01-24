@@ -46,3 +46,30 @@ class CodeGenerationResult extends GenerationStep {
   @override
   List<Object?> get props => [files, message];
 }
+
+class SavingError extends GenerationStep {
+  final Object error;
+  final String filePath;
+
+  SavingError(this.error, this.filePath);
+
+  @override
+  String get message =>
+      'Error while saving generated file "$filePath": ${error.toString()}';
+
+  @override
+  List<Object?> get props => [error, filePath, message];
+}
+
+class IgnoredExistingFile extends GenerationStep {
+  final String filePath;
+
+  IgnoredExistingFile(this.filePath);
+
+  @override
+  String get message =>
+      'Did not save generated "$filePath" because it already exists';
+
+  @override
+  List<Object?> get props => [filePath, message];
+}

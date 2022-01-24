@@ -39,7 +39,7 @@ class CodeGenerator {
     await for (final step in runGenerators(libraries)) {
       yield step;
       if (step is CodeGenerationResult) {
-        await _saveFiles(step.files);
+        yield* _saveFiles(step.files);
       }
     }
   }
@@ -71,12 +71,18 @@ class CodeGenerator {
     yield CodeGenerationResult(files);
   }
 
-  Future<void> _saveFiles(List<GeneratedFile> generatedFiles) async {
+  Stream<GenerationStep> _saveFiles(List<GeneratedFile> generatedFiles) async* {
     for (final generatedFile in generatedFiles) {
       final file = File(generatedFile.path);
-      if (!await file.exists()) {
-        await file.create(recursive: true);
-        await file.writeAsString(generatedFile.content);
+      try {
+        if (!await file.exists()) {
+          await file.create(recursive: true);
+          await file.writeAsString(generatedFile.content);
+        } else {
+          yield IgnoredExistingFile(file.path);
+        }
+      } catch (e) {
+        yield SavingError(e, file.path);
       }
     }
   }
