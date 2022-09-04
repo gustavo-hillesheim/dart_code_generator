@@ -1,4 +1,5 @@
 import 'package:analyzer/dart/ast/ast.dart';
+import 'package:analyzer/dart/analysis/results.dart';
 import 'package:code_generator/code_generator.dart';
 
 import 'generator_result.dart';
@@ -64,4 +65,14 @@ abstract class GeneratorForAnnotatedElements<T extends CompilationUnitMember>
   bool shouldGenerateFor(CompilationUnitMember member, String path) {
     return member is T && member.metadata.any(annotationMatcher);
   }
+}
+
+abstract class GeneratorForProject {
+  /// Description of the current generator.
+  String get description => runtimeType.toString();
+
+  /// Generates files for all libraries in a project.
+  ///
+  /// [members] is all [ResolvedLibraryResult]s found in the analyzed project.
+  GeneratorResult generate(List<ResolvedLibraryResult> members);
 }

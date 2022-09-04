@@ -15,6 +15,9 @@ export 'package_analyzer.dart';
 
 /// Analyzes a package and runs any registered generator that should generate for a given declaration.
 class CodeGenerator {
+  /// Project Generators used to generate code in [generateFor].
+  final List<GeneratorForProject> _projectGenerators;
+
   /// Generators used to generate code in [generateFor].
   final List<Generator> _generators;
 
@@ -23,8 +26,10 @@ class CodeGenerator {
 
   const CodeGenerator({
     required List<Generator> generators,
+    List<GeneratorForProject>? projectGenerators,
     PackageAnalyzer analyzer = const PackageAnalyzer(),
-  })  : _generators = generators,
+  })  : _projectGenerators = projectGenerators ?? const [],
+        _generators = generators,
         _analyzer = analyzer;
 
   /// Generates code for the source code inside [packageDirectory].
@@ -54,12 +59,16 @@ class CodeGenerator {
   /// Executes the generators for the given libraries.
   ///
   /// Loops through every top-level declaration in every item of [libraries],
-  /// passing them to each generators registered, and returning all files that would be generated.
+  /// passing them to each generator registered, and returning all files that would be generated.
   /// Returns a stream containing [RunningGeneratorStep] for all generators ran and a [CodeGenerationResult] for the final result.
   Stream<GenerationStep> runGenerators(
     List<ResolvedLibraryResult> libraries,
   ) async* {
     final files = <GeneratedFile>[];
+    for (final projectGenerator in _projectGenerators) {
+      yield RunningGeneratorStep(projectGenerator.description);
+      files.addAll(projectGenerator.generate(libraries).files);
+    }
     for (final library in libraries) {
       for (final unit in library.units) {
         for (final declaration in unit.unit.declarations) {
