@@ -8,15 +8,21 @@ import 'package:analyzer/file_system/physical_file_system.dart';
 class PackageAnalyzer {
   const PackageAnalyzer();
 
-  Future<List<ResolvedLibraryResult>> analyze(Directory directory) {
-    final collection = _createAnalysisContextCollection(directory);
+  Future<List<ResolvedLibraryResult>> analyzeDirectory(Directory directory) {
+    final collection =
+        _createAnalysisContextCollectionForPaths([directory.absolute.path]);
     return _readLibraries(collection);
   }
 
-  AnalysisContextCollection _createAnalysisContextCollection(
-      Directory directory) {
+  Future<List<ResolvedLibraryResult>> analyzeAll(List<String> filePaths) {
+    final collection = _createAnalysisContextCollectionForPaths(filePaths);
+    return _readLibraries(collection);
+  }
+
+  AnalysisContextCollection _createAnalysisContextCollectionForPaths(
+      List<String> paths) {
     return AnalysisContextCollection(
-      includedPaths: [directory.absolute.path],
+      includedPaths: paths,
       resourceProvider: PhysicalResourceProvider.INSTANCE,
     );
   }

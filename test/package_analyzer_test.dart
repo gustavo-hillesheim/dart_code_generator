@@ -15,7 +15,7 @@ void main() {
   });
 
   test('SHOULD analyze test_package', () async {
-    final libraries = await analyzer.analyze(testPackageDirectory);
+    final libraries = await analyzer.analyzeDirectory(testPackageDirectory);
 
     expect(libraries.length, 1);
     final library = libraries[0];
