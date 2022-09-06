@@ -10,6 +10,7 @@ import 'package_analyzer.dart';
 import 'file_watcher.dart';
 
 export 'generated_file.dart';
+export 'generation_step.dart';
 export 'generator.dart';
 export 'generator_result.dart';
 export 'package_analyzer.dart';
