@@ -84,3 +84,11 @@ class IgnoredExistingFile extends GenerationStep {
   @override
   List<Object?> get props => [filePath, message];
 }
+
+class FinishedWritingFilesStep extends GenerationStep {
+  @override
+  String get message => 'Finished writing generated files to file system';
+
+  @override
+  List<Object?> get props => [message];
+}

@@ -63,6 +63,7 @@ class CodeGenerator {
         yield* _saveFiles(step.files, overrideExisting: overrideExisting);
       }
     }
+    yield FinishedWritingFilesStep();
   }
 
   /// Generates code for the source code inside [packageDirectory], updating the
@@ -93,6 +94,7 @@ class CodeGenerator {
           yield* _saveFiles(step.files, overrideExisting: overrideExisting);
         }
       }
+      yield FinishedWritingFilesStep();
     }
   }
 
