@@ -83,10 +83,9 @@ class CodeGenerator {
     bool overrideExisting = true,
   }) async* {
     yield* generateFor(packageDirectory, overrideExisting: overrideExisting);
-    await for (final changedFiles
-        in _fileWatcher.watchFiles(packageDirectory)) {
+    await for (final _ in _fileWatcher.watchFiles(packageDirectory)) {
       yield AnalyzingPackageStep();
-      final libraries = await _analyzer.analyzeAll(changedFiles);
+      final libraries = await _analyzer.analyzeDirectory(packageDirectory);
       yield RunningGeneratorsStep();
       await for (final step in runGenerators(libraries)) {
         yield step;
